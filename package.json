@@ -1,0 +1,22 @@
+{
+  "name": "husky-broker",
+  "version": "0.0.0",
+  "description": "HuskyBroker",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "node ./tests/clientConnections.js"
+  },
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "lodash": "^4.17.11",
+    "mongoose": "^5.5.11",
+    "mosca": "^2.8.3"
+  },
+  "devDependencies": {
+    "mqtt": "^3.0.0"
+  }
+}
