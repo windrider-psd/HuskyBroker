@@ -30,7 +30,7 @@ const mongoose = require('mongoose');
  */
 
 /**
-* Callback for subscription observers
+* Callback for ready observers
 *
 * @callback readyCallback
 */

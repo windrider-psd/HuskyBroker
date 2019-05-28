@@ -1,11 +1,9 @@
 {
-  "name": "husky-broker",
+  "name": "@teamhusky/husky-broker",
   "version": "1.0.0",
   "description": "HuskyBroker",
   "main": "app.js",
-  "author": {
-    "name": "Husky Team"
-  },
+  "author": "Husky Team",
   "scripts": {
     "start": "node app.js",
     "test": "node ./tests/clientConnections.js"
@@ -18,5 +16,17 @@
   "devDependencies": {
     "chalk": "^2.4.2",
     "mqtt": "^3.0.0"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Christian-Lemos/HuskyBroker.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Christian-Lemos/HuskyBroker/issues"
+  },
+  "homepage": "https://github.com/Christian-Lemos/HuskyBroker#readme"
 }
