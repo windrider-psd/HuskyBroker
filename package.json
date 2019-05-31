@@ -9,12 +9,12 @@
     "test": "node ./tests/clientConnections.js"
   },
   "dependencies": {
+    "chalk": "^2.4.2",
     "lodash": "^4.17.11",
     "mongoose": "^5.5.11",
     "mosca": "^2.8.3"
   },
   "devDependencies": {
-    "chalk": "^2.4.2",
     "mqtt": "^3.0.0"
   },
   "directories": {

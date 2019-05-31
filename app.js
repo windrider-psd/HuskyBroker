@@ -38,9 +38,20 @@ const mongoose = require('mongoose');
 
 class HuskyServer {
 
-    constructor(mongoUrl, mqttPort, mqttUser, mqttPassword, adminUser, adminPassword) {
+    /**
+     * 
+     * @param {String} mongoURI The URI used for the mongoDB connection. Must use the new URL parser
+     * @param {String} mongoUser MongoDB's user
+     * @param {String} mongoPass MongoDB's password
+     * @param {Number} mqttPort This is the port that the MQTT broker will listen
+     * @param {String} mqttUser This is the common device user for connection
+     * @param {String} mqttPassword This is the common device password used for connections
+     * @param {String} adminUser The special MQTT client user
+     * @param {String} adminPassword The special MQTT client password
+     */
+    constructor(mongoURI, mongoUser, mongoPass, mqttPort, mqttUser, mqttPassword, adminUser, adminPassword) {
         this.mqttPort = mqttPort;
-        this.mongoUrl = mongoUrl;
+        this.mongoUrl = mongoURI;
         this.mqttUser = mqttUser;
         this.mqttPassword = mqttPassword;
         this.adminUser = adminUser;
@@ -73,12 +84,12 @@ class HuskyServer {
          */
         this.readyCallbacks = new Array();
 
-        mongoose.connect(mongoUrl).then(() => {
+        mongoose.connect(mongoURI, {useNewUrlParser : true, useCreateIndex : true, user : mongoUser, pass : mongoPass}).then(() => {
             Device.update({}, { deviceState: false });
 
             let moscaStorageOptions = {
                 type: 'mongo',
-                url: mongoUrl,
+                url: mongoURI,
                 pubsubCollection: 'ascoltatori',
                 mong: {
 
@@ -418,7 +429,7 @@ class HuskyServer {
      * Unsubscribes a device from a topic
      * @param {String} deviceId The device's Id
      * @param {String} topic The topic the device will unsubscribe
-     * @returns {Promise<void>} Returns a promise with the device's document. Will be rejected if the device is not found.
+     * @returns {Promise<Device.DeviceDocument>} Returns a promise with the device's document. Will be rejected if the device is not found.
      */
     UnsubscribeDeviceTopic(deviceId, topic) {
 
@@ -436,7 +447,7 @@ class HuskyServer {
                     else if (device) {
 
                         let callCallbacks = () => {
-                            this.subscritionCallbacks.forEach(element => {
+                            this.subscritionCallbacks.forEach(element => {                                
                                 element(device, topic, false)
                             });
                         }
@@ -449,7 +460,7 @@ class HuskyServer {
                         device.save()
                             .then(() => {
                                 callCallbacks();
-                                resolve();
+                                resolve(device);
                             })
                             .catch(err => {
                                 reject(err);
@@ -631,7 +642,7 @@ class HuskyServer {
                                     let topicString = `${deviceId}`
                                     let messageString = `add_sensor\n${sensor}\r${gpio}`
                                     this.PublishMessage(topicString, messageString);
-                                    resolve()
+                                    resolve(device)
                                 }
                             })
                         }
@@ -749,7 +760,42 @@ class HuskyServer {
             )
         })
     }
-
 }
 
-module.exports = {HuskyServer : HuskyServer, Device : Device}
+
+
+
+class HuskyServerConsoleLogger{
+
+    /**
+     * Logs a HuskyServer's activity 
+     * @param {HuskyServer} huskyServer 
+     */
+    constructor(huskyServer)
+    {
+        this.huskyServer = huskyServer;
+
+        this.huskyServer.AddConnectionObserver((device, isConnected) => {
+            let log = `${device.name}(${device.deviceId}) ${isConnected ? chalk.green("connected") : chalk.red("disconnected")}`
+            console.log(log);
+        })
+    
+
+        this.huskyServer.AddPublishObserver((packet, device) => {
+            let log = `${device.name}(${device.deviceId}) published ${packet.payload} to ${packet.topic}`
+            console.log(log);
+        })
+
+        this.huskyServer.AddSubscritionObserver((device, topic, isSubscribed) => {
+            let sub = `${isSubscribed ? `${chalk.green("subscribed")} to` : `${chalk.red("unsubscribed")} from`}`
+
+            let log = `${device.name}(${device.deviceId}) ${sub} ${topic}`; 
+
+            console.log(log);
+        })
+    }
+}
+
+
+
+module.exports = {HuskyServer : HuskyServer, Device : Device, HuskyServerConsoleLogger : HuskyServerConsoleLogger}
