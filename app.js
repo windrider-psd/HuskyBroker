@@ -226,8 +226,8 @@ class HuskyServer {
                         element(device, false);
                     });
                 }
-
-                let device = FindDevice(client.id);
+                
+                let device = this.FindDevice(client.id);
 
                 if (device) {
                     device.deviceState = false;
