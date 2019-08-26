@@ -90,10 +90,7 @@ class HuskyServer {
             let moscaStorageOptions = {
                 type: 'mongo',
                 url: mongoURI,
-                pubsubCollection: 'ascoltatori',
-                mong: {
-
-                }
+                pubsubCollection: 'ascoltatori'
             }
             let moscaSettings = {
                 port: mqttPort,
@@ -114,6 +111,12 @@ class HuskyServer {
             }
 
             let publishMiddleware = (client, topic, payload, callback) => {
+                console.log(client.admin == true || topic.split('/')[0] == client.id);
+                if(client == null)
+                {
+                    console.log("Client is null");
+                }
+
                 callback(null, client.admin == true || topic.split('/')[0] == client.id);
             }
             let subscriptionMiddleware = (client, topic, callback) => {
@@ -126,14 +129,14 @@ class HuskyServer {
             this.server = new mosca.Server(moscaSettings);
 
             this.server.on('clientConnected', (client) => {
-
+                console.log(client.id);
                 let callConnectionCallbacks = (device) => {
                     this.connectionCallbacks.forEach(element => {
                         element(device, true);
                     });
                 }
                 Device.findOne({
-
+                    deviceId : client.id
                 }, (err, device) => {
                     if (err) {
                         throw err;
@@ -175,9 +178,9 @@ class HuskyServer {
                 let topic = packet.topic.toString();
 
                 let parse = topic.split('/');
+                
                 try {
                     let device = this.FindDevice(parse[0])
-
                     if (parse[1] == 'status') {
                         if (device.status != payload) {
 
@@ -220,7 +223,6 @@ class HuskyServer {
             });
 
             this.server.on('clientDisconnected', (client) => {
-
                 let callConnectionCallbacks = (device) => {
                     this.connectionCallbacks.forEach(element => {
                         element(device, false);
@@ -248,6 +250,9 @@ class HuskyServer {
                     callback();
                 })
             });
+        }).catch((err) => {
+            console.log(mongoUser)
+            console.log(err);
         });
     }
 
